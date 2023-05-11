@@ -1,6 +1,40 @@
-import { useFilePicker } from 'use-file-picker';
 import React from 'react';
+import { useFilePicker } from 'use-file-picker';
+// import Jimp from 'jimp';
+// See https://github.com/jimp-dev/jimp/issues/1194
+import 'jimp'
+
 import './App.css';
+
+const ScaledImage = props => {
+  const { Jimp } = window;
+  const [imageData, setImageData] = React.useState("");
+  React.useEffect(() => {
+    const processImage = (file) => {
+            Jimp.read(file.content)
+            .then((f) => {
+              f 
+                .resize(256, 256) // resize
+                .quality(60) // set JPEG quality
+                .greyscale() // set greyscale
+                .getBase64Async(Jimp.MIME_JPEG)
+                .then(buffer => {
+                  setImageData(buffer);
+                  console.log('buffer len: ' + buffer.length)
+                });
+            })
+            .catch((err) => {
+              console.error(err);
+            })
+          }
+          processImage(props.file);
+        }, [Jimp, props.file]);
+  return <>
+          <h2>{props.file.name}</h2>
+          <img alt={props.file.name} src={imageData}></img>
+          <br />
+          </>
+}
 
 export default function App() {
   const [openFileSelector, { filesContent, loading, errors }] = useFilePicker({
@@ -32,9 +66,7 @@ export default function App() {
       <br />
       {filesContent.map((file, index) => (
         <div key={index}>
-          <h2>{file.name}</h2>
-          <img alt={file.name} src={file.content}></img>
-          <br />
+          <ScaledImage file={file} />
         </div>
       ))}
     </div>
