@@ -16,7 +16,8 @@ const ScaledImage = props => {
   const [imageData, setImageData] = React.useState("");
   React.useEffect(() => {
     const processImage = (file) => {
-      Jimp.read(file.content)
+      let file_url = URL.createObjectURL(file);
+      Jimp.read(file_url)
         .then((f) => {
           f
             .resize(256, 256) // resize
@@ -35,7 +36,7 @@ const ScaledImage = props => {
     processImage(props.file);
   }, [Jimp, props.file]);
   return <>
-    <h2>{props.file.name}</h2>
+    {/* <h2>{props.file.name}</h2> */}
     <img alt={props.file.name} src={imageData}></img>
     <br />
   </>
@@ -48,7 +49,6 @@ export default function App() {
       recursive: true,
     })
     setFiles(blobsInDirectory);
-    console.log('moo');
   };
 
   return (
