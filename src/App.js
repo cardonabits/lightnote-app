@@ -50,7 +50,7 @@ const ScaledImage = props => {
         })
     }
     processImage(props.file);
-  }, [Jimp, props.file]);
+  }, [props.file]);
   return <img alt={props.file.name} src={imageData}></img>
 }
 
@@ -63,11 +63,12 @@ export default function App() {
     setFiles(blobsInDirectory);
   };
 
+  const collator = new Intl.Collator('en', { numeric: true, sensitivity: 'base' });
   return (
     <div>
       <button onClick={() => openDirectory()}>Select Images Directory</button>
       <br />
-      {files.map((file, index) => (
+      {files.sort((a, b) => { return collator.compare(a.name, b.name)} ).map((file, index) => (
           <ScaledImage key={index} file={file} />
       ))}
     </div>
