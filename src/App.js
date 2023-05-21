@@ -60,7 +60,7 @@ export default function App() {
     const blobsInDirectory  = await directoryOpen({
       recursive: true,
     })
-    setFiles(blobsInDirectory);
+    setFiles(blobsInDirectory.sort((a, b) => { return collator.compare(a.name, b.name)} ));
   };
 
   const collator = new Intl.Collator('en', { numeric: true, sensitivity: 'base' });
@@ -68,7 +68,7 @@ export default function App() {
     <div>
       <button onClick={() => openDirectory()}>Select Images Directory</button>
       <br />
-      {files.sort((a, b) => { return collator.compare(a.name, b.name)} ).map((file, index) => (
+      {files.map((file, index) => (
           <ScaledImage key={index} file={file} />
       ))}
     </div>
