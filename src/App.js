@@ -27,7 +27,7 @@ const ScaledImage = props => {
       Jimp.read(file_url)
         .then((f) => {
           f
-            .resize(256, 256) // resize
+            .resize(200, 200) // resize
             .background(0xFFFFFFFF)
             .flip(false, true)
             .getBuffer(Jimp.MIME_BMP, (err, data) => {
@@ -35,7 +35,7 @@ const ScaledImage = props => {
               var bmpData = bmpJs.decode(data);
               const bit1bmp = bit1Encoder(bmpData, 1);
               // fs.writeFileSync(path.join(dir, `${name}.bmp`), bit1.data);
-              console.log('bit1bmp: ' + bit1bmp)
+              console.log('bit1bmp size: ' + bit1bmp.data.length)
               Jimp.read(bit1bmp.data)
               .then((f) => {
                 f.getBase64Async(Jimp.MIME_BMP)
@@ -51,11 +51,7 @@ const ScaledImage = props => {
     }
     processImage(props.file);
   }, [Jimp, props.file]);
-  return <>
-    {/* <h2>{props.file.name}</h2> */}
-    <img alt={props.file.name} src={imageData}></img>
-    <br />
-  </>
+  return <img alt={props.file.name} src={imageData}></img>
 }
 
 export default function App() {
@@ -72,9 +68,7 @@ export default function App() {
       <button onClick={() => openDirectory()}>Select Images Directory</button>
       <br />
       {files.map((file, index) => (
-        <div key={index}>
-          <ScaledImage file={file} />
-        </div>
+          <ScaledImage key={index} file={file} />
       ))}
     </div>
   );
