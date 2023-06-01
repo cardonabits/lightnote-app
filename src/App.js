@@ -2,7 +2,7 @@ import React from 'react';
 import {
   // fileOpen,
   directoryOpen,
-  fileSave,
+  //fileSave,
   supported,
 } from 'browser-fs-access';
 // import Jimp from 'jimp';
@@ -25,23 +25,23 @@ const ScaledImage = props => {
     // by the 'img' element.
     Jimp.read(file_url)
       .then((f) => {
-        f
-          .resize(20, 20)
+        return f
+          .resize(200, 200)
           .background(0xFFFFFFFF)
           .flip(false, true)
-          .getBuffer(Jimp.MIME_BMP, (err, data) => {
-            if (err) throw err;
-            var bmpData = bmpJs.decode(data);
-            const bit1bmp = bit1Encoder(bmpData, 1);
-            console.log('bit1bmp size: ' + bit1bmp.data.length)
-            Jimp.read(bit1bmp.data)
-              .then((f) => {
-                f.getBase64Async(Jimp.MIME_BMP)
-                  .then(buffer => {
-                    setImageData(buffer);
-                  })
-              })
-          });
+          .getBufferAsync(Jimp.MIME_BMP)
+      })
+      .then(data => {
+        var bmpData = bmpJs.decode(data);
+        const bit1bmp = bit1Encoder(bmpData, 1);
+        console.log('bit1bmp size: ' + bit1bmp.data.length)
+        return Jimp.read(bit1bmp.data)
+      })
+      .then((f) => {
+        return f.getBase64Async(Jimp.MIME_BMP)
+      })
+      .then(buffer => {
+        setImageData(buffer);
       })
       .catch((err) => {
         console.error(err);
@@ -66,38 +66,34 @@ export default function App() {
   };
 
   const generateROM = async () => {
+    const newHandle = await window.showSaveFilePicker({ suggestedName: "lightnote.rom" });
+    const writableStream = await newHandle.createWritable();
+
     const { Jimp } = window;
-    let read_files = files.map((file, index) => {
+    let promises = files.map((file, index) => {
       return Jimp.read(URL.createObjectURL(file))
         .then(f => {
-          f
-            .resize(20, 20)
+          return f
+            .resize(200, 200)
             .background(0xFFFFFFFF)
             .flip(false, true)
-            .getBuffer(Jimp.MIME_BMP, (err, data) => {
-              if (err) throw err;
-              var bmpData = bmpJs.decode(data);
-              const bit1bmp = bit1Encoder(bmpData, 1);
-              console.log('bit1bmp size: ' + bit1bmp.data.length)
-              return Jimp.read(bit1bmp.data);
-            })
-            .then((f) => {
-              f.getBase64Async(Jimp.MIME_BMP)
-                .then(buffer => {
-                  return buffer;
-                })
-            })
+            .getBufferAsync(Jimp.MIME_BMP)
+        })
+        .then(data => {
+          var bmpData = bmpJs.decode(data);
+          const bit1bmp = bit1Encoder(bmpData, 1);
+          console.log("file size: ", bit1bmp);
+          return writableStream.write({
+            type: "write",
+            data: bit1bmp.data,
+          })
         })
         .catch((err) => {
           console.error(err);
         })
     });
-
-    console.log(read_files);
-    // await fileSave(files[0], {
-    //   fileName: 'lightnote.rom',
-    //   extensions: ['.rom'],
-    // });
+    console.log(promises);
+    Promise.all(promises).then(res => { writableStream.close(); });
   };
 
   const collator = new Intl.Collator('en', { numeric: true, sensitivity: 'base' });
