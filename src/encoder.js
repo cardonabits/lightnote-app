@@ -60,14 +60,14 @@ function BmpEncoder(imgData) {
     // Why 2?
     this.rawSize = this.height * rowBytes * 4 + 2;
     this.fileSize = this.rawSize + this.offset;
-    this.data = Buffer.alloc(this.fileSize, 0x1);
 }
 
 function createInteger(numbers) {
     return numbers.reduce((final, n) => (final << 1) | n, 0);
 }
 
-BmpEncoder.prototype.encode = function (modify) {
+BmpEncoder.prototype.bmp_encode = function (modify) {
+    this.data = Buffer.alloc(this.fileSize, 0x1);
     this.pos = 0;
 
     this.data.write(this.flag, this.pos, 2); this.pos += 2;
@@ -145,9 +145,76 @@ BmpEncoder.prototype.encode = function (modify) {
     return this.data;
 };
 
-module.exports = function (imgData, modify) {
+BmpEncoder.prototype.raw_encode = function (modify) {
+    console.assert(this.width === 200);
+    console.assert(this.height === 200);
+    this.data = Buffer.alloc(5000, 0x1);
+    this.pos = 0;
+
+    var i = 0;
+    var rowBytes = this.width * this.bytesInColor;
+    let lineArr = [];
+
+    // Regular
+    for (var y = 0; y < this.height; y++) {
+        for (var x = 0; x < this.width; x++) {
+            const p = Math.floor(
+                this.pos + (this.height - 1 - y) * rowBytes + x * this.bytesInColor
+            );
+            switch (this.bitPP) {
+                case 24:
+                    i++; // a, not used
+                    this.data[p] = this.buffer[i++]; // b
+                    this.data[p + 1] = this.buffer[i++]; // g
+                    this.data[p + 2] = this.buffer[i++]; // r
+
+                    break;
+                case 1:
+                    i++; // a, not used
+                    const b = this.buffer[i++];
+                    const g = this.buffer[i++];
+                    const r = this.buffer[i++];
+
+                    const brightness = r * 0.2126 + g * 0.7152 + b * 0.0722;
+
+                    lineArr.push(brightness > (127 * modify) ? 0 : 1);
+
+                    if ((x + 1) % 8 === 0) {
+                        this.data[p - 1] = createInteger(lineArr);
+                        lineArr = [];
+                    } else if (x === this.width - 1 && lineArr.length > 0) {
+                        this.data[p - 1] = createInteger(lineArr) << 4;
+                        lineArr = [];
+                    }
+
+                    break;
+                default:
+                    throw new Error('Too lazy to add other depths.');
+            }
+        }
+
+        // Not necessary?
+        /*if (this.extraBytes > 0) {
+            var fillOffset = this.pos + y * rowBytes + this.width * 3;
+            this.data.fill(0, fillOffset, fillOffset + this.extraBytes);
+        }*/
+    }
+    return this.data;
+};
+
+exports.bmp = function (imgData, modify) {
     var encoder = new BmpEncoder(imgData);
-    var data = encoder.encode(modify);
+    var data = encoder.bmp_encode(modify);
+    return {
+        data: data,
+        width: imgData.width,
+        height: imgData.height
+    };
+};
+
+exports.raw = function (imgData, modify) {
+    var encoder = new BmpEncoder(imgData);
+    var data = encoder.raw_encode(modify);
     return {
         data: data,
         width: imgData.width,

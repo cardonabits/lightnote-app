@@ -33,7 +33,7 @@ const ScaledImage = props => {
       })
       .then(data => {
         var bmpData = bmpJs.decode(data);
-        const bit1bmp = bit1Encoder(bmpData, 1);
+        const bit1bmp = bit1Encoder.bmp(bmpData, 1);
         console.log('bit1bmp size: ' + bit1bmp.data.length)
         return Jimp.read(bit1bmp.data)
       })
@@ -81,7 +81,7 @@ export default function App() {
         })
         .then(data => {
           var bmpData = bmpJs.decode(data);
-          const bit1bmp = bit1Encoder(bmpData, 1);
+          const bit1bmp = bit1Encoder.raw(bmpData, 1);
           console.log("file size: ", bit1bmp);
           return writableStream.write({
             type: "write",
