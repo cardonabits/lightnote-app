@@ -93,7 +93,29 @@ export default function App() {
         })
     });
     console.log(promises);
-    Promise.all(promises).then(res => { writableStream.close(); });
+    Promise.all(promises)
+      .then(res => {
+          var config_sector = Buffer.alloc(12);
+          var pos = 0;
+          config_sector.writeUInt32LE(0x23571113, pos); pos += 4;
+          config_sector.writeUInt16LE(0x1800, pos); pos += 2;
+          config_sector.writeUInt32LE(files.length, pos); pos += 4;
+          config_sector.writeUInt8(0x2, pos); pos += 1;
+          config_sector.writeUInt8(0x2, pos); pos += 1;
+          return writableStream.write({
+            type: "write",
+            data: config_sector,
+            position: 16777216 -  0x1000,
+          })
+      })
+      .then(res => {
+          return writableStream.write({
+            type: "write",
+            data: 0,
+            position: 16777216 - 1,
+          })
+      })
+      .then(res => { writableStream.close(); });
   };
 
   const collator = new Intl.Collator('en', { numeric: true, sensitivity: 'base' });
