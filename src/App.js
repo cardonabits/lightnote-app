@@ -76,6 +76,7 @@ export default function App() {
   const generateROM = async () => {
     const newHandle = await window.showSaveFilePicker({ suggestedName: "lightnote.rom" });
     const writableStream = await newHandle.createWritable();
+    setProgress(10);
 
     const { Jimp } = window;
     let promises = files.map((file, index) => {
@@ -90,7 +91,9 @@ export default function App() {
         .then(data => {
           var bmpData = bmpJs.decode(data);
           const bit1bmp = bit1Encoder.raw(bmpData, 1);
-          console.log("file size: ", bit1bmp);
+          let prog = 100 * (index + 1) / files.length;
+          setProgress(prog);
+          console.log('progress: ' + prog);
           return writableStream.write({
             type: "write",
             data: bit1bmp.data,
@@ -134,7 +137,7 @@ export default function App() {
         progress={progress}
       />
       <button onClick={() => openDirectory()}>Select Images Directory</button>
-      <button onClick={() => generateROM()}>Generate ROM</button>
+      <button onClick={() => generateROM()} disabled={files.length === 0 || progress !== 100}>Generate ROM</button>
       <br />
       {files.map((file, index) => (
         <ScaledImage key={index} index={index} file={file} setProgress={setProgress} numFiles={files.length} />
