@@ -6,6 +6,8 @@ import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
+  // Note: StrictMode causes useEffect hook to be called twice, but only in
+  // development
   <React.StrictMode>
     <App />
   </React.StrictMode>

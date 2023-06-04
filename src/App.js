@@ -1,4 +1,5 @@
 import React from 'react';
+import LoadingBar from 'react-top-loading-bar'
 import {
   // fileOpen,
   directoryOpen,
@@ -18,6 +19,9 @@ const ScaledImage = props => {
   const { Jimp } = window;
   const [imageData, setImageData] = React.useState("");
   React.useEffect(() => {
+    let prog = 25 * (props.index + 1) / props.numFiles;
+    props.setProgress(prog);
+    console.log('progress: ' + prog);
     let file_url = URL.createObjectURL(props.file);
     // First we read the image with Jimp, do initial processing
     // and convert to 1bpp.  The 1bpp image is then read again
@@ -26,7 +30,7 @@ const ScaledImage = props => {
     Jimp.read(file_url)
       .then((f) => {
         return f
-          .resize(200, 200)
+          .resize(100, 100)
           .background(0xFFFFFFFF)
           .flip(false, true)
           .getBufferAsync(Jimp.MIME_BMP)
@@ -34,7 +38,6 @@ const ScaledImage = props => {
       .then(data => {
         var bmpData = bmpJs.decode(data);
         const bit1bmp = bit1Encoder.bmp(bmpData, 1);
-        console.log('bit1bmp size: ' + bit1bmp.data.length)
         return Jimp.read(bit1bmp.data)
       })
       .then((f) => {
@@ -42,6 +45,9 @@ const ScaledImage = props => {
       })
       .then(buffer => {
         setImageData(buffer);
+        let prog = 100 * (props.index + 1) / props.numFiles;
+        props.setProgress(prog);
+        console.log('progress: ' + prog);
       })
       .catch((err) => {
         console.error(err);
@@ -57,12 +63,14 @@ export default function App() {
     console.log('Using the fallback implementation.');
   }
   const [files, setFiles] = React.useState([]);
+  const [progress, setProgress] = React.useState(0);
 
   const openDirectory = async () => {
     const blobsInDirectory = await directoryOpen({
       recursive: true,
     })
     setFiles(blobsInDirectory.sort((a, b) => { return collator.compare(a.name, b.name) }));
+    setProgress(10);
   };
 
   const generateROM = async () => {
@@ -121,11 +129,15 @@ export default function App() {
   const collator = new Intl.Collator('en', { numeric: true, sensitivity: 'base' });
   return (
     <div>
+      <LoadingBar
+        color='#f11946'
+        progress={progress}
+      />
       <button onClick={() => openDirectory()}>Select Images Directory</button>
       <button onClick={() => generateROM()}>Generate ROM</button>
       <br />
       {files.map((file, index) => (
-        <ScaledImage key={index} file={file} />
+        <ScaledImage key={index} index={index} file={file} setProgress={setProgress} numFiles={files.length} />
       ))}
     </div>
   );
