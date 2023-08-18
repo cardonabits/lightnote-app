@@ -6,7 +6,9 @@ import {
   //fileSave,
   supported,
 } from 'browser-fs-access';
-import Jimp from 'jimp';
+// import Jimp from 'jimp';
+// See https://github.com/jimp-dev/jimp/issues/1194
+import 'jimp'
 
 import './App.css';
 
@@ -14,6 +16,7 @@ var bmpJs = require('bmp-js');
 var bit1Encoder = require('./encoder');
 
 const ScaledImage = props => {
+  const { Jimp } = window;
   const [imageData, setImageData] = React.useState("");
   const [imageDataNext, setImageDataNext] = React.useState("");
   React.useEffect(() => {
@@ -26,13 +29,13 @@ const ScaledImage = props => {
     // by the 'img' element.
     Jimp.read(file_url)
       .then((f) => {
+        f.resize(400, Jimp.AUTO)
+          .grayscale();
         let ff = f.clone();
         ff
           .blur(10)
           .getBase64(Jimp.MIME_JPEG, (_, buffer) => setImageDataNext(buffer));
         return f
-          .resize(400, Jimp.AUTO)
-          .grayscale()
           .getBase64Async(Jimp.MIME_JPEG)
       })
       // .then(data => {
@@ -58,6 +61,7 @@ const ScaledImage = props => {
 }
 
 const OriginalImage = props => {
+  const { Jimp } = window;
   const [imageData, setImageData] = React.useState("");
   React.useEffect(() => {
     if (props.file === "")
@@ -98,6 +102,7 @@ export default function App() {
   };
 
   const generateROM = async () => {
+    const { Jimp } = window;
     const newHandle = await window.showSaveFilePicker({ suggestedName: "lightnote.rom" });
     const writableStream = await newHandle.createWritable();
     setProgress(10);
