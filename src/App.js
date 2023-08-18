@@ -1,14 +1,12 @@
 import React from 'react';
 import LoadingBar from 'react-top-loading-bar'
 import {
-  // fileOpen,
-  directoryOpen,
+  fileOpen,
+  // directoryOpen,
   //fileSave,
   supported,
 } from 'browser-fs-access';
-// import Jimp from 'jimp';
-// See https://github.com/jimp-dev/jimp/issues/1194
-import 'jimp'
+import Jimp from 'jimp';
 
 import './App.css';
 
@@ -16,12 +14,10 @@ var bmpJs = require('bmp-js');
 var bit1Encoder = require('./encoder');
 
 const ScaledImage = props => {
-  const { Jimp } = window;
   const [imageData, setImageData] = React.useState("");
   React.useEffect(() => {
-    let prog = 25 * (props.index + 1) / props.numFiles;
-    props.setProgress(prog);
-    console.log('progress: ' + prog);
+    if (props.file === "")
+      return;
     let file_url = URL.createObjectURL(props.file);
     // First we read the image with Jimp, do initial processing
     // and convert to 1bpp.  The 1bpp image is then read again
@@ -30,6 +26,7 @@ const ScaledImage = props => {
     Jimp.read(file_url)
       .then((f) => {
         return f
+          .crop(0, 0, 400, 400)
           .resize(100, 100)
           .background(0xFFFFFFFF)
           .flip(false, true)
@@ -45,9 +42,29 @@ const ScaledImage = props => {
       })
       .then(buffer => {
         setImageData(buffer);
-        let prog = 100 * (props.index + 1) / props.numFiles;
-        props.setProgress(prog);
-        console.log('progress: ' + prog);
+      })
+      .catch((err) => {
+        console.error(err);
+      })
+      props.setProgress(100);
+  }, [props.file]);
+  return <img alt="" style={imageData !== "" ? {} : { display: 'none' }} src={imageData} />
+}
+
+const OriginalImage = props => {
+  const [imageData, setImageData] = React.useState("");
+  React.useEffect(() => {
+    if (props.file === "")
+      return;
+    let file_url = URL.createObjectURL(props.file);
+    Jimp.read(file_url)
+      .then((f) => {
+        return f
+          .resize(400, Jimp.AUTO)
+          .getBase64Async(Jimp.MIME_JPEG)
+      })
+      .then(buffer => {
+        setImageData(buffer);
       })
       .catch((err) => {
         console.error(err);
@@ -62,15 +79,16 @@ export default function App() {
   } else {
     console.log('Using the fallback implementation.');
   }
-  const [files, setFiles] = React.useState([]);
+  const [file, setFile] = React.useState("");
   const [progress, setProgress] = React.useState(0);
 
-  const openDirectory = async () => {
-    const blobsInDirectory = await directoryOpen({
-      recursive: true,
+  const openFile = async () => {
+    const imageBlob = await fileOpen({
+      extensions: ['.png', '.jpg', '.jpeg', '.webp'],
+      description: 'Image file',
     })
-    setFiles(blobsInDirectory.sort((a, b) => { return collator.compare(a.name, b.name) }));
-    setProgress(10);
+    setFile(imageBlob);
+    setProgress(100);
   };
 
   const generateROM = async () => {
@@ -78,7 +96,7 @@ export default function App() {
     const writableStream = await newHandle.createWritable();
     setProgress(10);
 
-    const { Jimp } = window;
+    let files = [];
     let promises = files.map((file, index) => {
       return Jimp.read(URL.createObjectURL(file))
         .then(f => {
@@ -129,19 +147,17 @@ export default function App() {
       .then(res => { writableStream.close(); });
   };
 
-  const collator = new Intl.Collator('en', { numeric: true, sensitivity: 'base' });
   return (
     <div>
       <LoadingBar
         color='#f11946'
         progress={progress}
       />
-      <button onClick={() => openDirectory()}>Select Images Directory</button>
-      <button onClick={() => generateROM()} disabled={files.length === 0 || progress !== 100}>Generate ROM</button>
+      <button onClick={() => openFile()}>Select an Image</button>
+      <button onClick={() => generateROM()} disabled={progress !== 100}>Generate ROM</button>
       <br />
-      {files.map((file, index) => (
-        <ScaledImage key={index} index={index} file={file} setProgress={setProgress} numFiles={files.length} />
-      ))}
+      <OriginalImage file={file} />
+      <ScaledImage file={file} setProgress={setProgress} />
     </div>
   );
 }
