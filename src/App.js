@@ -15,6 +15,7 @@ var bit1Encoder = require('./encoder');
 
 const ScaledImage = props => {
   const [imageData, setImageData] = React.useState("");
+  const [imageDataNext, setImageDataNext] = React.useState("");
   React.useEffect(() => {
     if (props.file === "")
       return;
@@ -25,21 +26,23 @@ const ScaledImage = props => {
     // by the 'img' element.
     Jimp.read(file_url)
       .then((f) => {
+        let ff = f.clone();
+        ff
+          .blur(10)
+          .getBase64(Jimp.MIME_JPEG, (_, buffer) => setImageDataNext(buffer));
         return f
-          .crop(0, 0, 400, 400)
-          .resize(100, 100)
-          .background(0xFFFFFFFF)
-          .flip(false, true)
-          .getBufferAsync(Jimp.MIME_BMP)
+          .resize(400, Jimp.AUTO)
+          .grayscale()
+          .getBase64Async(Jimp.MIME_JPEG)
       })
-      .then(data => {
-        var bmpData = bmpJs.decode(data);
-        const bit1bmp = bit1Encoder.bmp(bmpData, 1);
-        return Jimp.read(bit1bmp.data)
-      })
-      .then((f) => {
-        return f.getBase64Async(Jimp.MIME_BMP)
-      })
+      // .then(data => {
+      //   var bmpData = bmpJs.decode(data);
+      //   const bit1bmp = bit1Encoder.bmp(bmpData, 1);
+      //   return Jimp.read(bit1bmp.data)
+      // })
+      // .then((f) => {
+      //   return f.getBase64Async(Jimp.MIME_BMP)
+      // })
       .then(buffer => {
         setImageData(buffer);
       })
@@ -48,7 +51,10 @@ const ScaledImage = props => {
       })
       props.setProgress(100);
   }, [props.file]);
-  return <img alt="" style={imageData !== "" ? {} : { display: 'none' }} src={imageData} />
+  return <div>
+        <img alt="" style={imageData !== "" ? {} : { display: 'none' }} src={imageData} />
+        <img alt="" style={imageDataNext !== "" ? {} : { display: 'none' }} src={imageDataNext} />
+        </div>
 }
 
 const OriginalImage = props => {
@@ -157,7 +163,9 @@ export default function App() {
       <button onClick={() => generateROM()} disabled={progress !== 100}>Generate ROM</button>
       <br />
       <OriginalImage file={file} />
+      <div>
       <ScaledImage file={file} setProgress={setProgress} />
+      </div>
     </div>
   );
 }
