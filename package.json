@@ -8,6 +8,7 @@
     "@testing-library/user-event": "^13.5.0",
     "bmp-js": "^0.1.0",
     "browser-fs-access": "^0.34.0",
+    "floyd-steinberg": "^1.0.6",
     "jimp": "^0.22.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

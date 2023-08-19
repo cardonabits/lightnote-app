@@ -9,20 +9,26 @@ import {
 // import Jimp from 'jimp';
 // See https://github.com/jimp-dev/jimp/issues/1194
 import 'jimp'
-
 import './App.css';
+var floydSteinberg = require('floyd-steinberg');
 
 var bmpJs = require('bmp-js');
 var bit1Encoder = require('./encoder');
 
+// input is a rectangular image, output is the
+// image cropped to the largest square contained in
+// it
+function center_square(image) {
+  if (image.bitmap.width > image.bitmap.height) {
+    image.crop((image.bitmap.width - image.bitmap.height)/2, 0, image.bitmap.height, image.bitmap.height)
+  } else {
+    image.crop(0, (image.bitmap.height - image.bitmap.width)/2, image.bitmap.width, image.bitmap.width)
+  }
+}
+
 const ScaledImage = props => {
   const { Jimp } = window;
   const [imageData, setImageData] = React.useState("");
-  const [imageData2, setImageData2] = React.useState("");
-  const [imageData3, setImageData3] = React.useState("");
-  const [imageData4, setImageData4] = React.useState("");
-  const [imageData5, setImageData5] = React.useState("");
-  const [imageData6, setImageData6] = React.useState("");
   React.useEffect(() => {
     if (props.file === "")
       return;
@@ -33,46 +39,37 @@ const ScaledImage = props => {
     // by the 'img' element.
     Jimp.read(file_url)
       .then((f) => {
+        // resize, grayscale and clone
         f.resize(400, Jimp.AUTO)
           .grayscale();
-        let fsharp = f.clone();
-        fsharp
-          // see https://www.codedrome.com/exploring-convolution-matrices-with-jimp/
-          .convolute([[0,-1,0], [-1,5,-1], [0,-1,0]])
-          .getBase64(Jimp.MIME_JPEG, (_, buffer) => setImageData2(buffer));
-        let fblur = f.clone();
-        fblur
-          .blur(1)
-          .getBase64(Jimp.MIME_JPEG, (_, buffer) => setImageData3(buffer));
-        let fsub = fsharp.clone();
-        fsub
-          .composite(fblur, 0, 0, {
-            mode: Jimp.BLEND_DIFFERENCE,
-          })
-          .getBase64(Jimp.MIME_JPEG, (_, buffer) => setImageData4(buffer));
-        let fadd = fsharp.clone();
-        fadd
-          .composite(fsub, 0, 0, {
-            mode: Jimp.BLEND_ADD,
-          })
-          .getBase64(Jimp.MIME_JPEG, (_, buffer) => setImageData5(buffer));
+
+        // crop square around center
+        center_square(f);
+
+        // resize
+        f.resize(200, 200)
+        props.setProgress(25);
+
+        // There is no jimp plugin for dithering, using a different
+        // package
+        f.bitmap = floydSteinberg(f.bitmap)
         return f
           .getBufferAsync(Jimp.MIME_BMP)
       })
       .then(data => {
         var bmpData = bmpJs.decode(data);
         const bit1bmp = bit1Encoder.bmp(bmpData, 1);
+        props.setProgress(50);
         return Jimp.read(bit1bmp.data)
       })
       .then((f) => {
+        // The decode/encode process flips the image.  Revert.
+        f.flip(false, true)
         return f
-          .crop(0, 0, 400, 400)
-          .resize(200, 200)
-          .background(0xFFFFFFFF)
-          .flip(false, true)
           .getBase64Async(Jimp.MIME_BMP)
       })
       .then(buffer => {
+        props.setProgress(75);
         setImageData(buffer);
       })
       .catch((err) => {
@@ -81,11 +78,6 @@ const ScaledImage = props => {
       props.setProgress(100);
   }, [props.file]);
   return <div>
-        <img alt="" style={imageData2 !== "" ? {} : { display: 'none' }} src={imageData2} />
-        <img alt="" style={imageData3 !== "" ? {} : { display: 'none' }} src={imageData3} />
-        <img alt="" style={imageData4 !== "" ? {} : { display: 'none' }} src={imageData4} />
-        <img alt="" style={imageData5 !== "" ? {} : { display: 'none' }} src={imageData5} />
-        <img alt="" style={imageData6 !== "" ? {} : { display: 'none' }} src={imageData6} />
         <img alt="" style={imageData !== "" ? {} : { display: 'none' }} src={imageData} />
         </div>
 }
