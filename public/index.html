@@ -30,6 +30,8 @@
       <span id="status"></span>
     </p>
     <p>
+      <button id="detach" disabled="true" hidden="true">Detach DFU</button>
+      <input type="file" id="firmwareFile" name="file" disabled="true" hidden="true"/>
       <label for="vid">Vendor ID (hex):</label>
       <input list="vendor_ids" type="text" name="vid" id="vid" maxlength="6" size="8" pattern="0x[A-Fa-f0-9]{1,4}"/>
       <datalist id="vendor_ids">
@@ -51,14 +53,9 @@
       <div id="usbInfo" style="white-space: pre"></div>
       <div id="dfuInfo" style="white-space: pre"></div>
     </p>
-    <fieldset>
-      <legend>Runtime mode</legend>
-      <button id="detach" disabled="true">Detach DFU</button>
-    </fieldset>
-    <fieldset>
       <form id="configForm">
-        <label for="transferSize">Transfer Size:</label>
-        <input type="number" name="transferSize" id="transferSize" value="1024"/>
+        <label hidden=true for="transferSize">Transfer Size:</label>
+        <input type="number" hidden=true disabled=true name="transferSize" id="transferSize" value="1024"/>
         <div id="dfuseFields" hidden="true">
           <label for="dfuseStartAddress">DfuSe Start Address:</label>
           <input type="text" name="dfuseStartAddress" id="dfuseStartAddress" title="Initial memory address to read/write from (hex)" size="10" pattern="0x[A-Fa-f0-9]+"/>
@@ -66,41 +63,14 @@
           <input type="number" name="dfuseUploadSize" id="dfuseUploadSize" min="1"/>
         </div>
       
-        <legend>DFU mode</legend>
-        <fieldset>
-          <legend>Firmware Download (write to USB device)</legend>
           <p>
-            <input type="file" id="firmwareFile" name="file" disabled="true"/>
-          </p>
-          <p>
-            <button id="download" disabled="true">Download</button>
+            <button id="download" disabled="true">Save to lightnote</button>
           </p>
           <div class="log" id="downloadLog"></div>
-        </fieldset>
-        <fieldset>
-          <legend>Firmware Upload (read from USB device)</legend>
           <p>
-            <button id="upload" disabled="true">Upload</button>
+            <button id="upload" disabled="true">Display on lightnote</button>
           </p>
           <div class="log" id="uploadLog"></div>
-        </fieldset>
       </form>
-    </fieldset>
-    <h1>About</h1>
-    <p>
-      This is a proof-of-concept demo of host <a href="http://wiki.openmoko.org/wiki/USB_DFU">USB DFU</a> drivers in Javascript utilizing the <a href="https://wicg.github.io/webusb/">WebUSB</a> draft standard to implement USB firmware updates from the browser.
-    </p>
-    <h1>Prerequisites</h1>
-    <p>In order to run this demo, you will need:</p>
-    <ul>
-      <li>
-        <p>An up-to-date version of Chrome, at least version 61 or newer</p>
-      </li>
-      <li>
-        <p>A USB DFU class device</p>
-        <p>For a WebUSB friendly USB DFU bootloader that can be flashed onto <a href="http://wiki.stm32duino.com/index.php?title=Blue_Pill">inexpensive STM32F103 boards</a>, check out the <a href="https://github.com/devanlai/dapboot">dapboot</a> project.</p>
-        <p>Some recent STM32 parts have on-chip USB DfuSe bootloaders that are supported by this site.</p>
-      </li>
-    <ul>
   </body>
 </html>
