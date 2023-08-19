@@ -51,10 +51,9 @@ export const ScaledImage = props => {
       .then(data => {
         var bmpData = bmpJs.decode(data);
         const bit1bmp = bit1Encoder.bmp(bmpData, 1);
+        const bit1raw = bit1Encoder.raw(bmpData, 1);
         const buffer = new Uint8Array(8192);
-        // we only care about the data portion of the BMP buffer,
-        // that is, the last 5000 bytes
-        buffer.set(bit1bmp.data.slice(-5000))
+        buffer.set(bit1raw.data)
         // make it available outside of React
         window.imageBuffer = buffer;
         setProgress(50);
