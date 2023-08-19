@@ -31,8 +31,7 @@
     <p>
       <button id="detach" disabled="true" hidden="true">Detach DFU</button>
       <input type="file" id="firmwareFile" name="file" disabled="true" hidden="true"/>
-      <label for="vid">Vendor ID (hex):</label>
-      <input list="vendor_ids" type="text" name="vid" id="vid" maxlength="6" size="8" pattern="0x[A-Fa-f0-9]{1,4}"/>
+      <input hidden list="vendor_ids" type="text" name="vid" id="vid" maxlength="6" size="8" pattern="0x[A-Fa-f0-9]{1,4}"/>
       <datalist id="vendor_ids">
         <option value="0x1209">dapboot DFU bootloader</option>
         <option value="0x0D28">mbed DAPLink</option>
