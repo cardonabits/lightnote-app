@@ -624,7 +624,8 @@ var device = null;
                 return false;
             }
 
-            if (device && firmwareFile != null) {
+            console.log(window.imageBuffer);
+            if (device && window.imageBuffer != null) {
                 setLogContext(downloadLog);
                 clearLog(downloadLog);
                 try {
@@ -635,7 +636,7 @@ var device = null;
                 } catch (error) {
                     device.logWarning("Failed to clear status");
                 }
-                await device.do_download(transferSize, firmwareFile, manifestationTolerant).then(
+                await device.do_download(transferSize, imageBuffer, manifestationTolerant).then(
                     () => {
                         logInfo("Done!");
                         setLogContext(null);

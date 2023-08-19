@@ -18,7 +18,6 @@ export const ScaledImage = props => {
   const [imageData, setImageData] = React.useState("");
   let file = props.file; 
   let setProgress = props.setProgress;
-  let setImageBuffer = props.setImageBuffer;
   React.useEffect(() => {
     if (file === "")
       return;
@@ -52,7 +51,12 @@ export const ScaledImage = props => {
       .then(data => {
         var bmpData = bmpJs.decode(data);
         const bit1bmp = bit1Encoder.bmp(bmpData, 1);
-        setImageBuffer(bit1bmp.data);
+        const buffer = new Uint8Array(8192);
+        // we only care about the data portion of the BMP buffer,
+        // that is, the last 5000 bytes
+        buffer.set(bit1bmp.data.slice(-5000))
+        // make it available outside of React
+        window.imageBuffer = buffer;
         setProgress(50);
         return Jimp.read(bit1bmp.data);
       })
@@ -68,7 +72,7 @@ export const ScaledImage = props => {
       .catch((err) => {
         console.error(err);
       });
-  }, [file, setProgress, setImageBuffer, Jimp]);
+  }, [file, setProgress, Jimp]);
   return <div>
     <img alt="" style={imageData !== "" ? {} : { display: 'none' }} src={imageData} />
   </div>;

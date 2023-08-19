@@ -22,7 +22,6 @@ export default function App() {
   }
   const [file, setFile] = React.useState("");
   const [progress, setProgress] = React.useState(0);
-  const [imageBuffer, setImageBuffer] = React.useState(null);
 
   const openFile = async () => {
     const imageBlob = await fileOpen({
@@ -32,21 +31,6 @@ export default function App() {
     setFile(imageBlob);
   };
 
-  const generateROM = async () => {
-    const newHandle = await window.showSaveFilePicker({ suggestedName: "lightnote.rom" });
-    const writableStream = await newHandle.createWritable();
-    setProgress(10);
-
-    writableStream.write({
-            type: "write",
-            data: imageBuffer,
-          })
-        .catch((err) => {
-          console.error(err);
-        })
-      .then(res => { writableStream.close(); });
-  };
-
   return (
     <div>
       <LoadingBar
@@ -54,11 +38,10 @@ export default function App() {
         progress={progress}
       />
       <button onClick={() => openFile()}>Select an Image</button>
-      <button onClick={() => generateROM()} disabled={progress !== 100}>Generate ROM</button>
       <br />
       <OriginalImage file={file} />
       <div>
-      <ScaledImage file={file} setProgress={setProgress} setImageBuffer={setImageBuffer} />
+      <ScaledImage file={file} setProgress={setProgress} />
       </div>
     </div>
   );
