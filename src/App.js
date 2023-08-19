@@ -25,6 +25,7 @@ export default function App() {
   }
   const [file, setFile] = React.useState("");
   const [progress, setProgress] = React.useState(0);
+  const [scaledImageBuffer, setScaledImageBuffer] = React.useState();
 
   const openFile = async () => {
     const imageBlob = await fileOpen({
@@ -102,7 +103,7 @@ export default function App() {
       <br />
       <OriginalImage file={file} />
       <div>
-      <ScaledImage file={file} setProgress={setProgress} />
+      <ScaledImage file={file} setProgress={setProgress} setScaledImageBuffer={setScaledImageBuffer} />
       </div>
     </div>
   );
