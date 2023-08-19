@@ -1,15 +1,16 @@
-import React from 'react';
+import React from 'react'
 import LoadingBar from 'react-top-loading-bar'
 import {
   fileOpen,
   // directoryOpen,
   //fileSave,
   supported,
-} from 'browser-fs-access';
+} from 'browser-fs-access'
 // import Jimp from 'jimp';
 // See https://github.com/jimp-dev/jimp/issues/1194
 import 'jimp'
 import './App.css';
+
 var floydSteinberg = require('floyd-steinberg');
 
 var bmpJs = require('bmp-js');
