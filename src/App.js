@@ -1,5 +1,6 @@
 import React from 'react'
 import LoadingBar from 'react-top-loading-bar'
+import { Cropper } from 'react-advanced-cropper';
 import {
   fileOpen,
   // directoryOpen,
@@ -10,6 +11,8 @@ import {
 // See https://github.com/jimp-dev/jimp/issues/1194
 import 'jimp'
 import './App.css';
+import 'react-advanced-cropper/dist/style.css';
+import 'react-advanced-cropper/dist/style.css';
 import { OriginalImage } from './OriginalImage';
 import { ScaledImage } from './ScaledImage';
 
@@ -22,6 +25,14 @@ export default function App() {
   }
   const [file, setFile] = React.useState("");
   const [progress, setProgress] = React.useState(0);
+  const [image, setImage] = React.useState(
+    'https://images.unsplash.com/photo-1599140849279-1014532882fe?fit=crop&w=1300&q=80'
+  );
+
+  const onChange = (cropper) => {
+    console.log(cropper.getCoordinates(), cropper.getCanvas());
+  };
+
 
   const openFile = async () => {
     const imageBlob = await fileOpen({
@@ -29,6 +40,7 @@ export default function App() {
       description: 'Image file',
     })
     setFile(imageBlob);
+    setImage(URL.createObjectURL(imageBlob));
   };
 
   return (
@@ -40,8 +52,16 @@ export default function App() {
       <button onClick={() => openFile()}>Select an Image</button>
       <br />
       <OriginalImage file={file} />
+      <Cropper
+            src={image}
+            onChange={onChange}
+            className={'cropper'}
+            stencilProps={{
+              aspectRatio: 1/1,
+          }}
+        />;
       <div>
-      <ScaledImage file={file} setProgress={setProgress} />
+        <ScaledImage file={file} setProgress={setProgress} />
       </div>
     </div>
   );

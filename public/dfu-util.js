@@ -418,7 +418,7 @@ var device = null;
                     device.startAddress = segment.start;
                     dfuseStartAddressField.value = "0x" + segment.start.toString(16);
                     const maxReadSize = device.getMaxReadSize(segment.start);
-                    dfuseUploadSizeField.value = maxReadSize;
+                    dfuseUploadSizeField.value = 0x2000;
                     dfuseUploadSizeField.max = maxReadSize;
                 }
             } else {
@@ -534,34 +534,34 @@ var device = null;
             }
         });
 
-        detachButton.addEventListener('click', function() {
-            if (device) {
-                device.detach().then(
-                    async len => {
-                        let detached = false;
-                        try {
-                            await device.close();
-                            await device.waitDisconnected(5000);
-                            detached = true;
-                        } catch (err) {
-                            console.log("Detach failed: " + err);
-                        }
+        // detachButton.addEventListener('click', function() {
+        //     if (device) {
+        //         device.detach().then(
+        //             async len => {
+        //                 let detached = false;
+        //                 try {
+        //                     await device.close();
+        //                     await device.waitDisconnected(5000);
+        //                     detached = true;
+        //                 } catch (err) {
+        //                     console.log("Detach failed: " + err);
+        //                 }
 
-                        onDisconnect();
-                        device = null;
-                        if (detached) {
-                            // Wait a few seconds and try reconnecting
-                            setTimeout(autoConnect, 5000);
-                        }
-                    },
-                    async error => {
-                        await device.close();
-                        onDisconnect(error);
-                        device = null;
-                    }
-                );
-            }
-        });
+        //                 onDisconnect();
+        //                 device = null;
+        //                 if (detached) {
+        //                     // Wait a few seconds and try reconnecting
+        //                     setTimeout(autoConnect, 5000);
+        //                 }
+        //             },
+        //             async error => {
+        //                 await device.close();
+        //                 onDisconnect(error);
+        //                 device = null;
+        //             }
+        //         );
+        //     }
+        // });
 
         uploadButton.addEventListener('click', async function(event) {
             event.preventDefault();
@@ -592,8 +592,7 @@ var device = null;
                 }
 
                 try {
-                    const blob = await device.do_upload(transferSize, maxSize);
-                    saveAs(blob, "firmware.bin");
+                    const blob = await device.do_upload(transferSize, 8192);
                 } catch (error) {
                     logError(error);
                 }
@@ -604,17 +603,17 @@ var device = null;
             return false;
         });
 
-        firmwareFileField.addEventListener("change", function() {
-            firmwareFile = null;
-            if (firmwareFileField.files.length > 0) {
-                let file = firmwareFileField.files[0];
-                let reader = new FileReader();
-                reader.onload = function() {
-                    firmwareFile = reader.result;
-                };
-                reader.readAsArrayBuffer(file);
-            }
-        });
+        // firmwareFileField.addEventListener("change", function() {
+        //     firmwareFile = null;
+        //     if (firmwareFileField.files.length > 0) {
+        //         let file = firmwareFileField.files[0];
+        //         let reader = new FileReader();
+        //         reader.onload = function() {
+        //             firmwareFile = reader.result;
+        //         };
+        //         reader.readAsArrayBuffer(file);
+        //     }
+        // });
 
         downloadButton.addEventListener('click', async function(event) {
             event.preventDefault();
