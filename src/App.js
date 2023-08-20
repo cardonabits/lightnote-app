@@ -1,6 +1,7 @@
 import React from 'react'
 import LoadingBar from 'react-top-loading-bar'
-import { Cropper } from 'react-advanced-cropper';
+import { FixedCropper, ImageRestriction } from 'react-advanced-cropper';
+import 'react-advanced-cropper/dist/style.css';
 import {
   fileOpen,
   // directoryOpen,
@@ -11,11 +12,7 @@ import {
 // See https://github.com/jimp-dev/jimp/issues/1194
 import 'jimp'
 import './App.css';
-import 'react-advanced-cropper/dist/style.css';
-import 'react-advanced-cropper/dist/style.css';
-import { OriginalImage } from './OriginalImage';
 import { ScaledImage } from './ScaledImage';
-
 
 export default function App() {
   if (supported) {
@@ -23,24 +20,24 @@ export default function App() {
   } else {
     console.log('Using the fallback implementation.');
   }
-  const [file, setFile] = React.useState("");
   const [progress, setProgress] = React.useState(0);
-  const [image, setImage] = React.useState(
-    'https://images.unsplash.com/photo-1599140849279-1014532882fe?fit=crop&w=1300&q=80'
-  );
-
-  const onChange = (cropper) => {
-    console.log(cropper.getCoordinates(), cropper.getCanvas());
-  };
-
+  const [originalImage, setOriginalImage] = React.useState(null);
+  const [croppedImage, setCroppedImage] = React.useState(null);
+  const cropperRef = React.useRef(null);
 
   const openFile = async () => {
     const imageBlob = await fileOpen({
       extensions: ['.png', '.jpg', '.jpeg', '.webp'],
       description: 'Image file',
     })
-    setFile(imageBlob);
-    setImage(URL.createObjectURL(imageBlob));
+    setOriginalImage(URL.createObjectURL(imageBlob));
+  };
+
+  const cropImage = async () => {
+    if (cropperRef.current) {
+        setCroppedImage(cropperRef.current.getCanvas()?.toDataURL());
+        console.log(cropperRef.current.getCanvas()?.toDataURL());
+    }
   };
 
   return (
@@ -51,17 +48,26 @@ export default function App() {
       />
       <button onClick={() => openFile()}>Select an Image</button>
       <br />
-      <OriginalImage file={file} />
-      <Cropper
-            src={image}
-            onChange={onChange}
-            className={'cropper'}
-            stencilProps={{
-              aspectRatio: 1/1,
-          }}
-        />;
+      <FixedCropper
+        src={originalImage}
+        ref={cropperRef}
+        style={{width: 400}}
+        stencilProps={{
+          handlers: false,
+          lines: false,
+          movable: false,
+          resizable: false,
+          aspectRatio: 1 / 1,
+        }}
+        stencilSize={{
+          width: 400,
+          height: 400
+        }}
+        imageRestriction={ImageRestriction.stencil}
+      />
+      <button onClick={() => cropImage()}>Accept Image Boundaries</button>
       <div>
-        <ScaledImage file={file} setProgress={setProgress} />
+        <ScaledImage croppedImage={croppedImage} setProgress={setProgress} />
       </div>
     </div>
   );

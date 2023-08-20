@@ -16,17 +16,16 @@ function center_square(image) {
 export const ScaledImage = props => {
   const { Jimp } = window;
   const [imageData, setImageData] = React.useState("");
-  let file = props.file; 
   let setProgress = props.setProgress;
+  let croppedImage = props.croppedImage;
   React.useEffect(() => {
-    if (file === "")
+    if (croppedImage === null)
       return;
-    let file_url = URL.createObjectURL(file);
     // First we read the image with Jimp, do initial processing
     // and convert to 1bpp.  The 1bpp image is then read again
     // with Jimp so we can convert to Base64 to be used
     // by the 'img' element.
-    Jimp.read(file_url)
+    Jimp.read(croppedImage)
       .then((f) => {
         // resize, grayscale and clone
         f.resize(400, Jimp.AUTO)
@@ -71,7 +70,7 @@ export const ScaledImage = props => {
       .catch((err) => {
         console.error(err);
       });
-  }, [file, setProgress, Jimp]);
+  }, [imageData, croppedImage, setProgress, Jimp]);
   return <div>
     <img alt="" style={imageData !== "" ? {} : { display: 'none' }} src={imageData} />
   </div>;
