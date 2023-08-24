@@ -20,9 +20,12 @@ export default function App() {
   } else {
     console.log('Using the fallback implementation.');
   }
+  const { Jimp } = window;
   const [progress, setProgress] = React.useState(0);
   const [originalImage, setOriginalImage] = React.useState(null);
   const [croppedImage, setCroppedImage] = React.useState(null);
+  const [imageCaption, setImageCaption] = React.useState("");
+
   const cropperRef = React.useRef(null);
 
   const openFile = async () => {
@@ -30,7 +33,16 @@ export default function App() {
       extensions: ['.png', '.jpg', '.jpeg', '.webp'],
       description: 'Image file',
     })
-    setOriginalImage(URL.createObjectURL(imageBlob));
+      let file = URL.createObjectURL(imageBlob);
+      Jimp.read(file)
+        .then((f) => {
+          return f
+          .resize(400, Jimp.AUTO)
+          .getBase64Async(Jimp.MIME_JPEG);
+        })
+        .then((f) => {
+          setOriginalImage(f);
+        })
   };
 
   const cropImage = async () => {
@@ -66,9 +78,19 @@ export default function App() {
         imageRestriction={ImageRestriction.stencil}
       />
       <button onClick={() => cropImage()}>Accept Image Boundaries</button>
+      <button onClick={() => setImageCaption(document.getElementById('caption').value) }>Set Caption</button>
       <div>
-        <ScaledImage croppedImage={croppedImage} setProgress={setProgress} />
+      <label for="caption">Image Caption:</label>
+      <div>
+        <textarea name="caption" id="caption" cols="16" rows="5"></textarea>
       </div>
+      <div>
+        <ScaledImage croppedImage={croppedImage} caption={imageCaption} setProgress={setProgress} />
+        <div>
+        <textarea style={{ textAlign: 'center', borderStyle: 'none' }} readOnly={true} value={imageCaption} />
+        </div>
+      </div>
+    </div>
     </div>
   );
 }

@@ -15,9 +15,13 @@ function center_square(image) {
 }
 export const ScaledImage = props => {
   const { Jimp } = window;
+
   const [imageData, setImageData] = React.useState("");
+
   let setProgress = props.setProgress;
   let croppedImage = props.croppedImage;
+  let imageCaption = props.caption;
+
   React.useEffect(() => {
     if (croppedImage === null)
       return;
@@ -53,6 +57,10 @@ export const ScaledImage = props => {
         const bit1raw = bit1Encoder.raw(bmpData, 1);
         const buffer = new Uint8Array(8192);
         buffer.set(bit1raw.data)
+        var enc = new TextEncoder(); // always utf-8
+        buffer.set(enc.encode(imageCaption), 5000)
+        console.log(enc.encode(imageCaption));
+        console.log(buffer);
         // make it available outside of React
         window.imageBuffer = buffer;
         setProgress(50);
@@ -70,8 +78,10 @@ export const ScaledImage = props => {
       .catch((err) => {
         console.error(err);
       });
-  }, [imageData, croppedImage, setProgress, Jimp]);
-  return <div>
-    <img alt="" style={imageData !== "" ? {} : { display: 'none' }} src={imageData} />
+  }, [imageData, imageCaption, croppedImage, setProgress, Jimp]);
+
+  return <div style={imageData !== "" ? {} : { display: 'none' }} >
+    <img alt="" src={imageData} />
+
   </div>;
 };
