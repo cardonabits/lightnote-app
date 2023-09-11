@@ -9,6 +9,7 @@
     "bmp-js": "^0.1.0",
     "browser-fs-access": "^0.34.1",
     "floyd-steinberg": "^1.0.6",
+    "gh-pages": "^6.0.0",
     "jimp": "^0.22.10",
     "react": "^18.2.0",
     "react-advanced-cropper": "^0.19.3",
@@ -21,7 +22,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy" : "npm run build",
+    "deploy" : "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
