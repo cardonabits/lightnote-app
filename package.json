@@ -9,7 +9,6 @@
     "bmp-js": "^0.1.0",
     "browser-fs-access": "^0.34.1",
     "floyd-steinberg": "^1.0.6",
-    "gh-pages": "^6.0.0",
     "jimp": "^0.22.10",
     "react": "^18.2.0",
     "react-advanced-cropper": "^0.19.3",
@@ -23,8 +22,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "predeploy" : "npm run build",
-    "deploy" : "gh-pages -d build"
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
@@ -46,6 +45,7 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "@types/wicg-file-system-access": "^2020.9.6"
+    "@types/wicg-file-system-access": "^2020.9.6",
+    "gh-pages": "^6.0.0"
   }
 }
